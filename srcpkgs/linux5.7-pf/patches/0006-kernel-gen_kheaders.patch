@@ -1,0 +1,13 @@
+--- a/kernel/gen_kheaders.sh
++++ b/kernel/gen_kheaders.sh
+@@ -86,8 +86,8 @@ find $cpio_dir -type f -print0 |
+ # For compatibility with older versions of tar, files are fed to tar
+ # pre-sorted, as --sort=name might not be available.
+ find $cpio_dir -printf "./%P\n" | LC_ALL=C sort | \
+-    tar "${KBUILD_BUILD_TIMESTAMP:+--mtime=$KBUILD_BUILD_TIMESTAMP}" \
+-    --owner=0 --group=0 --numeric-owner --no-recursion \
++    bsdtar "${KBUILD_BUILD_TIMESTAMP:+--mtime=$KBUILD_BUILD_TIMESTAMP}" \
++    --uid 0 --gid 0 --numeric-owner --no-recursion \
+     -Jcf $tarfile -C $cpio_dir/ -T - > /dev/null
+ 
+ echo $headers_md5 > kernel/kheaders.md5

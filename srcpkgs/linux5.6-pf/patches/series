@@ -1,0 +1,17 @@
+0003-ppc64-be-elfv2.patch
+0005-smsc95xx-mac.patch
+0006-kernel-gen_kheaders.patch
+0102-Increase-the-ext4-default-commit-age.patch
+0103-silence-rapl.patch
+0104-pci-pme-wakeups.patch
+0105-ksm-wakeups.patch
+0106-intel_idle-tweak-cpuidle-cstates.patch
+0111-give-rdrand-some-credit.patch
+0112-ipv4-tcp-allow-the-memory-tuning-for-tcp-to-go-a-lit.patch
+0113-kernel-time-reduce-ntp-wakeups.patch
+0121-use-lfence-instead-of-rep-and-nop.patch
+0122-do-accept-in-LIFO-order-for-cache-efficiency.patch
+0124-locking-rwsem-spin-faster.patch
+0130-nvme-workaround.patch
+0131-Don-t-report-an-error-if-PowerClamp-run-on-other-CPU.patch
+aspm-simpler.patch
