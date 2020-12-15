@@ -1,0 +1,3 @@
+version="${_major}.${_minor}-pf${_pfrel}"
+site="https://gitlab.com/post-factum/pf-kernel/tags"
+pattern="href=\"/post-factum/pf-kernel/-/archive/v${_major}.${_minor}-pf${_pfrel}/pf-kernel-v\\K[-pf\\d.]*(?=\\.tar\\.gz)"
