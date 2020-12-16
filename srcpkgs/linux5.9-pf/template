@@ -1,27 +1,21 @@
 # Template file for 'linux5.9-pf'
 pkgname=linux5.9-pf
-version=5.9pf7
+version=5.9pf8
 revision=1
-_pfbase=14
+_pfbase=15
 __version=( ${version//./ } )
 __vcomp=( ${__version[1]//pf/ } )
 _major=${__version[0]}
 _minor=${__vcomp[0]}
 _basekernel=${_major}.${_minor}
 _pfrel=${__vcomp[1]}
-#_pfcommit=633114f63bd09adff647b9a16c79cda7ded313f4
-_pfpatchhome="https://github.com/pfactum/pf-kernel/compare"
-_pfpatchname="v$_major.$_minor...v$_major.$_minor-pf$_pfrel.diff"
-#_pfpatchname="v$_major.$_minor...$_pfcommit.diff"
 wrksrc="linux-${_basekernel}"
 short_desc="Linux kernel (${_major}.${_minor} post-factum ${_pfrel} patch)"
 maintainer="Joseph Benden <joe@benden.us>"
 license="GPL-2.0-only"
 homepage="https://www.kernel.org"
-distfiles="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${_basekernel}.tar.xz
- ${_pfpatchhome}/${_pfpatchname}"
-checksum="3239a4ee1250bf2048be988cc8cb46c487b2c8a0de5b1b032d38394d5c6b1a06
- b355f7e30127e5123a87d2052b4d0cc9d7b5d56e974bc0b625da957c638a1ad0"
+distfiles="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${_basekernel}.tar.xz"
+checksum="3239a4ee1250bf2048be988cc8cb46c487b2c8a0de5b1b032d38394d5c6b1a06"
 skip_extraction="${_pfpatchname}"
 patch_args="-Np1"
 python_version=3
@@ -52,10 +46,6 @@ mutable_files="
  /usr/lib/modules/${_kernver}/modules.alias
  /usr/lib/modules/${_kernver}/modules.alias.bin
  /usr/lib/modules/${_kernver}/modules.devname"
-
-post_extract() {
-	patch ${patch_args} <${XBPS_SRCDISTDIR}/${pkgname}-${version}/${_pfpatchname}
-}
 
 do_configure() {
 	# 5.9 misses Documentation/DocBook. We ship the directory from 4.12 here.
