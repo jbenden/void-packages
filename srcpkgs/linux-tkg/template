@@ -1,0 +1,182 @@
+# Template file for 'linux${_basever}-tkg-${_cpusched}${_compiler_name}'
+# shellcheck -s bash srcpkgs/linux-tkg/template
+
+# TODO: set these to defaults and use etc/conf to vary if desired from shipping...
+_commit=a380d532bc85013c120b1d689a07367afc0e026b
+_version=5.15.76
+_sub=76
+_basever=515
+_basekernel=5.15
+_cpusched=pds
+_compiler_name=
+
+# shellcheck disable=2034
+wrksrc=linux-tkg-${_commit}
+_files="${XBPS_SRCPKGDIR}/linux-tkg/files"
+_ispkgbuild="true"
+_distro="Void"
+_srcpath="linux-src-git"
+# shellcheck disable=2034
+_opt_ver="5.15+"
+
+# shellcheck disable=2154
+if [[ "$_sub" == rc* ]]; then
+	# xbps forces 3 digits in version for kernel
+	version=${_basekernel}.0
+	_rc_kern_ver=${_basekernel}-${_sub}
+	_kern_ver_path=${_basekernel}-${_sub}
+	_kern_ver_dir=${version}-${_sub}
+	_kern_ver=${version}
+	kernel_site="https://git.kernel.org/torvalds/t/linux-${_rc_kern_ver}.tar.gz"
+else
+	version=${_basekernel}.${_sub}
+	if [ "$_sub" != "0" ]; then
+		_kern_ver=${_basekernel}.${_sub}
+		_kern_ver_path=${_basekernel}.${_sub}
+	else
+		_kern_ver=${_basekernel}
+		_kern_ver_path=${_basekernel}
+	fi
+	_kern_ver_dir=${version}
+	kernel_site="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${_kern_ver}.tar.xz"
+fi
+revision=1
+
+_where="${XBPS_BUILDDIR}/${wrksrc}"
+# shellcheck disable=2034
+_srcdir="${XBPS_BUILDDIR}/${wrksrc}"
+_srcpath="linux-${_kern_ver}"
+_kernver="${_kern_ver_dir}-tkg-${_cpusched}${_compiler_name}_${revision}"
+# shellcheck disable=2154
+_compiler_opt="${_compileropt}"
+_make_kernver="-tkg-${_cpusched}${_compiler_name}_${revision}"
+
+# shellcheck disable=2034,2154
+pkgname=linux${_basever}-tkg-${_cpusched}${_compiler_name}
+# shellcheck disable=2034
+python_version=3
+# shellcheck disable=2034
+patch_args="-Np1"
+hostmakedepends="
+ bc
+ cpio
+ curl
+ docbook-xsl
+ elfutils-devel
+ flex
+ git
+ gmp-devel
+ graphviz
+ inetutils
+ kmod
+ libelf
+ libmpc-devel
+ ncurses-devel
+ ncurses-libtinfo-devel
+ openssl-devel
+ pahole
+ patchutils
+ perl
+ pkg-config
+ python3-Sphinx
+ python3-sphinx_rtd_theme
+ schedtool
+ tar
+ uboot-mkimage
+ wget
+ xmlto
+ zstd"
+# shellcheck disable=2034
+makedepends="modprobed-db xz"
+triggers="kernel-hooks"
+kernel_hooks_version="${_kern_ver_dir}-tkg-${_cpusched}${_compiler_name}_${revision}"
+
+if [ "${_compiler_name:=}" = "-llvm" ]; then
+	hostmakedepends+=" llvm clang lld libclang libclang-cpp"
+fi
+
+# shellcheck disable=2034,2154
+pkgname=linux${_basever}-tkg-${_cpusched}${_compiler_name}
+version=${_basekernel}.${_sub}
+revision=1
+# shellcheck disable=2034
+build_style=linux-tkg
+# shellcheck disable=2034
+archs="x86_64"
+short_desc="Linux Kernel with custom TKG patchsets ($_basekernel series)"
+# shellcheck disable=2034
+maintainer="Joseph Benden <joe@benden.us>"
+# shellcheck disable=2034
+license="GPL-2.0-only"
+# shellcheck disable=2034
+homepage="https://github.com/jbenden/void-packages/tree/linux-tkg"
+# shellcheck disable=2034
+distfiles="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${_version}.tar.xz
+ https://github.com/Frogging-Family/linux-tkg/archive/${_commit}.tar.gz"
+# shellcheck disable=2034
+checksum="9007a020c419e3625b980e361be09f70ebd99e156ccb66129a981483d065d57f
+ d69d3ce2eee7911368d39f21abee01320d3c58f86be599d6cc68dacd1f0bec23"
+
+nostrip=yes
+noverifyrdeps=yes
+noshlibprovides=yes
+preserve=yes
+# shellcheck disable=2034
+nodebug=yes
+
+# These files could be modified when an external module is built.
+# shellcheck disable=2034
+mutable_files="
+ /usr/lib/modules/${_kernver}/modules.builtin.bin
+ /usr/lib/modules/${_kernver}/modules.builtin.alias.bin
+ /usr/lib/modules/${_kernver}/modules.softdep
+ /usr/lib/modules/${_kernver}/modules.dep
+ /usr/lib/modules/${_kernver}/modules.dep.bin
+ /usr/lib/modules/${_kernver}/modules.symbols
+ /usr/lib/modules/${_kernver}/modules.symbols.bin
+ /usr/lib/modules/${_kernver}/modules.alias
+ /usr/lib/modules/${_kernver}/modules.alias.bin
+ /usr/lib/modules/${_kernver}/modules.devname"
+
+linux-tkg-dbg_package() {
+	preserve=yes
+	nostrip=yes
+	noverifyrdeps=yes
+	noshlibprovides=yes
+	# shellcheck disable=2034
+	repository=debug
+	short_desc+=" - debugging symbols"
+	pkg_install() {
+		vmove usr/lib/debug
+	}
+}
+
+linux515-tkg-pds_package() {
+	short_desc+=" - PDS CPU Scheduler"
+	nostrip=yes
+	noverifyrdeps=yes
+	noshlibprovides=yes
+	preserve=yes
+	# shellcheck disable=2034
+	triggers="kernel-hooks"
+	_kernver="${_kern_ver_dir}-tkg-${_cpusched}${_compiler_name}_${revision}"
+	# shellcheck disable=2034
+	kernel_hooks_version="${_kern_ver_dir}-tkg-${_cpusched}${_compiler_name}_${revision}"
+}
+
+linux515-tkg-headers-pds_package() {
+	# shellcheck disable=2034
+	short_desc+=" - Headers and scripts for building modules for the kernel"
+	# shellcheck disable=2034
+	nostrip=yes
+	# shellcheck disable=2034
+	preserve=yes
+	# shellcheck disable=2034
+	noverifyrdeps=yes
+	# shellcheck disable=2034
+	noshlibprovides=yes
+	pkg_install() {
+		vmove /usr/src
+		vmove "/usr/lib/modules/${_kernver}/build"
+	}
+}

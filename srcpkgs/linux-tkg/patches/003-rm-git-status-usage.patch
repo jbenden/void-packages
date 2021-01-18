@@ -1,0 +1,22 @@
+--- a/linux-tkg-config/prepare	2022-09-28 09:19:56.676990142 -0700
++++ b/linux-tkg-config/prepare	2022-09-28 09:22:38.963967465 -0700
+@@ -461,19 +461,6 @@
+ 
+ 
+ _tkg_initscript() {
+-
+-  if ! whereis git > /dev/null 2>&1; then
+-    warning "the 'git' command is not installed. Please install it then re-run the install script of linux-tkg."
+-    exit 1
+-  fi
+-
+-  if ! git status > /dev/null 2>&1; then
+-    warning "linux-tkg needs to be git cloned"
+-    msg2 "please delete the current linux-tkg folder and re-created it with"
+-    msg2 "git clone --depth=1 https://github.com/Frogging-Family/linux-tkg.git"
+-    exit 1
+-  fi
+-
+   # Default to Arch
+   if [ -z "$_distro" ] || [ "$_ispkgbuild" = "true" ]; then
+     msg2 "Defaulting to Archlinux target\n"

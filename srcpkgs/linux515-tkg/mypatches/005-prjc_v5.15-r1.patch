@@ -1,0 +1,13 @@
+--- a/linux-tkg-patches/5.15/0009-prjc_v5.15-r1.patch	2022-10-10 13:19:34.412769025 -0700
++++ b/linux-tkg-patches/5.15/0009-prjc_v5.15-r1.patch	2022-10-10 13:25:20.677135084 -0700
+@@ -5295,8 +5295,8 @@
+ +		preempt_enable_no_resched();
+ +	}
+ +
+-+	/* if (tsk_is_pi_blocked(tsk))
+-+		return; */
+++	if (tsk_is_pi_blocked(tsk))
+++		return;
+ +
+ +	/*
+ +	 * If we are going to sleep and we have plugged IO queued,

@@ -1,0 +1,21 @@
+--- linux-tkg-config/prepare.orig	2023-01-12 09:11:55.638073170 -0700
++++ linux-tkg-config/prepare	2023-01-12 09:14:25.061238120 -0700
+@@ -449,18 +449,6 @@
+ 
+ _tkg_initscript() {
+ 
+-  if ! whereis git > /dev/null 2>&1; then
+-    warning "the 'git' command is not installed. Please install it then re-run the install script of linux-tkg."
+-    exit 1
+-  fi
+-
+-  if ! git status > /dev/null 2>&1; then
+-    warning "linux-tkg needs to be git cloned"
+-    msg2 "please delete the current linux-tkg folder and re-created it with"
+-    msg2 "git clone --depth=1 https://github.com/Frogging-Family/linux-tkg.git"
+-    exit 1
+-  fi
+-
+   typeset -Ag _deprecated_config_var_set
+ 
+   # Check if user is defining deprecated config vars

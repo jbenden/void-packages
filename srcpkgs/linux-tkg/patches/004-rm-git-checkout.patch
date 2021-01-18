@@ -1,0 +1,76 @@
+--- a/linux-tkg-config/prepare	2022-10-10 11:56:25.374706861 -0700
++++ b/linux-tkg-config/prepare	2022-10-10 12:02:46.921782941 -0700
+@@ -394,73 +394,6 @@
+   fi
+ 
+   cd "$_where"
+-
+-  if ! [ -d linux-src-git ]; then
+-    msg2 "First initialization of the linux source code git folder"
+-    mkdir linux-src-git
+-    cd linux-src-git
+-    git init
+-
+-    for remote in "${!_kernel_git_remotes[@]}"; do
+-      git remote add "$remote" "${_kernel_git_remotes[$remote]}"
+-    done
+-  else
+-    cd linux-src-git
+-
+-    # Remove "origin" remote if present
+-    if git remote -v | grep -w "origin" ; then
+-      git remote rm origin
+-    fi
+-
+-    for remote in "${!_kernel_git_remotes[@]}"; do
+-      if ! git remote -v | grep -w "$remote" ; then
+-        git remote add "$remote" "${_kernel_git_remotes[$remote]}"
+-      fi
+-    done
+-
+-    msg2 "Current branch: $(git branch | grep "\*")"
+-    msg2 "Reseting files to their original state"
+-
+-    git reset --hard HEAD
+-    git clean -f -d -x
+-  fi
+-
+-  if [[ "$_sub" = rc* ]]; then
+-    msg2 "Switching to master branch for RC Kernel"
+-
+-    if ! git branch --list | grep "master-${_git_mirror}" ; then
+-      msg2 "master branch doesn't locally exist, shallow cloning..."
+-      git remote set-branches --add kernel.org master
+-      git remote set-branches --add googlesource.com master
+-      git fetch --depth=1 $_git_mirror master
+-      git fetch --depth 1 $_git_mirror tag "$_kernel_git_tag"
+-      git checkout -b master-${_git_mirror} ${_git_mirror}/master
+-    else
+-      msg2 "master branch exists locally, updating..."
+-      git checkout master-${_git_mirror}
+-      git fetch --depth 1 $_git_mirror tag "$_kernel_git_tag"
+-      git reset --hard ${_git_mirror}/master
+-    fi
+-    msg2 "Checking out latest RC tag: $_kernel_git_tag"
+-    git checkout "$_kernel_git_tag"
+-  else
+-    msg2 "Switching to linux-${_basekernel}.y"
+-    if ! git branch --list | grep -w "linux-${_basekernel}-${_git_mirror}" ; then
+-      msg2 "${_basekernel}.y branch doesn't locally exist, shallow cloning..."
+-      git remote set-branches --add kernel.org linux-${_basekernel}.y
+-      git remote set-branches --add googlesource.com linux-${_basekernel}.y
+-      git fetch --depth=1 $_git_mirror linux-${_basekernel}.y
+-      git fetch --depth=1 $_git_mirror tag "$_kernel_git_tag"
+-      git checkout -b linux-${_basekernel}-${_git_mirror} ${_git_mirror}/linux-${_basekernel}.y
+-    else
+-      msg2 "${_basekernel}.y branch exists locally, updating..."
+-      git checkout linux-${_basekernel}-${_git_mirror}
+-      git fetch --depth 1 $_git_mirror tag "$_kernel_git_tag"
+-      git reset --hard ${_git_mirror}/linux-${_basekernel}.y
+-    fi
+-    msg2 "Checking out latest release: $_kernel_git_tag"
+-    git checkout "$_kernel_git_tag"
+-  fi
+ }
+ 
+ 
