@@ -1,0 +1,99 @@
+# Template file for 'emacs-nativecomp'
+# pinned to git
+pkgname=emacs-nativecomp
+_commit=18e2de1bec9c2d49a9d7352db04b44deeea6a22b
+_repo="https://github.com/emacs-mirror/emacs"
+_branch=emacs-29
+version=20231104
+revision=1
+wrksrc="emacs-${_commit}"
+build_style=gnu-configure
+# --with-x-toolkit=athena --without-toolkit-scroll-bars
+#--with-x-toolkit=gtk3 --with-xwidgets --with-native-compilation
+configure_args="--with-file-notification=inotify --with-modules
+ --with-native-compilation --with-x-toolkit=athena
+ $(vopt_with dbus) $(vopt_with gsettings)
+ $(vopt_with gconf) $(vopt_with m17n m17n-flt) $(vopt_with gmp libgmp)
+ $(vopt_with jpeg) $(vopt_with tiff) $(vopt_with gif) $(vopt_with png)
+ $(vopt_with xpm) $(vopt_with svg rsvg) $(vopt_with imagemagick)
+ $(vopt_with xml xml2) $(vopt_with gnutls) $(vopt_with sound)
+ $(vopt_with json) $(vopt_with harfbuzz) $(vopt_with cairo)
+ $(vopt_with pgtk) $(vopt_with dbus)"
+hostmakedepends="pkg-config tar automake texinfo git"
+makedepends="ncurses-devel libXaw-devel libXaw3d-devel
+ dbus-devel acl-devel libgccjit-devel elogind-devel git $(vopt_if gconf GConf-devel)
+ $(vopt_if gsettings gsettings-desktop-schemas-devel) $(vopt_if jpeg libjpeg-turbo-devel)
+ $(vopt_if tiff tiff-devel) $(vopt_if gif giflib-devel) $(vopt_if png libpng-devel)
+ $(vopt_if xpm libXpm-devel) $(vopt_if svg librsvg-devel) $(vopt_if gnutls gnutls-devel)
+ $(vopt_if imagemagick libmagick-devel) $(vopt_if xml libxml2-devel)
+ $(vopt_if sound alsa-lib-devel) $(vopt_if m17n m17n-lib-devel)
+ $(vopt_if json jansson-devel) $(vopt_if harfbuzz harfbuzz-devel)
+ $(vopt_if cairo cairo-devel) $(vopt_if gmp gmp-devel)
+ $(vopt_if pgtk gtk+3-devel webkit2gtk-devel pango-devel)"
+depends="emacs-nativecomp-common-${version}_${revision}"
+short_desc="GNU Emacs editor stable-29 branch"
+maintainer="Joseph Benden <joe@benden.us>"
+license="GPL-3.0-or-later"
+homepage="http://www.gnu.org/software/emacs/"
+distfiles="${_repo}/archive/${_commit}.tar.gz"
+checksum=7820ababf3b6f478885b149b160da29631b3c4aaf24c13c34194be7b36f3cd2a
+provides="emacs-${version}_${revision}"
+replaces="emacs>=0"
+
+nocross=yes
+nopie=yes
+
+# Package build options
+build_options="gconf gsettings jpeg tiff gif png xpm svg xml imagemagick gnutls sound
+ json harfbuzz cairo gmp fastboot lto pgtk dbus m17n"
+build_options_default="jpeg tiff gif png xpm svg xml gnutls sound
+ json harfbuzz cairo gmp pgtk m17n"
+desc_option_lto="Enable Link Time Optimization for build"
+desc_option_xpm="Enable support for XPM images"
+desc_option_sound="Enable support for sound"
+desc_option_m17n="Enable support for m17n multilingual text processing"
+
+pre_configure() {
+	./autogen.sh
+}
+
+do_build() {
+	CFLAGS+=" -Os -g"
+	CXXFLAGS+=" -Os -g"
+
+	if [[ "$build_option_lto" ]]; then
+		CFLAGS+=" -flto"
+		CXXFLAGS+=" -flto"
+	fi
+
+	export LD="/usr/bin/ld.gold"
+	export CFLAGS+=" -fuse-ld=gold"
+	export CXXFLAGS+=" -fuse-ld=gold"
+
+	if [[ "$build_option_fastboot" ]]; then
+		make NATIVE_FAST_BOOT=1 ${makejobs}
+	else
+		make NATIVE_FULL_AOT=1 ${makejobs}
+	fi
+}
+
+do_install() {
+	make DESTDIR=${PKGDESTDIR} -C ${wrksrc} install
+	make DESTDIR=${PKGDESTDIR} -C ${wrksrc} install-eln
+
+	# remove conflict with ctags package
+	mv ${PKGDESTDIR}/usr/bin/{ctags,ctags.emacs}
+	mv ${PKGDESTDIR}/usr/share/man/man1/{ctags.1.gz,ctags.emacs.1.gz}
+}
+
+emacs-nativecomp-common_package() {
+	short_desc+=" - common files"
+	provides="emacs-common-${version}_${revision}"
+	replaces="emacs-common>=0"
+	pkg_install() {
+		vmove usr/share/emacs
+		vmove usr/share/man
+		vmove usr/share/info
+		rm -f ${PKGDESTDIR}/usr/share/info/info.info.gz
+	}
+}
