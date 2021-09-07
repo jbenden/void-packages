@@ -1,0 +1,26 @@
+# Template file for 'picom-git'
+pkgname=picom-git
+version=20211006
+revision=2
+_commit=ad18d129cc549e4e00a0499df7de87f249a3a71f
+wrksrc="picom-${_commit}"
+build_style=meson
+configure_args="-Dwith_docs=true"
+hostmakedepends="pkg-config asciidoc"
+makedepends="MesaLib-devel dbus-devel libconfig-devel libev-devel pcre-devel
+ pixman-devel xcb-util-image-devel xcb-util-renderutil-devel
+ libxdg-basedir-devel uthash"
+depends="desktop-file-utils"
+short_desc="Lightweight compositor for X11 (previously a compton fork)"
+maintainer="Joseph Benden <joe@benden.us>"
+license="MIT, MPL-2.0"
+homepage="https://github.com/yshui/picom/"
+distfiles="https://github.com/yshui/picom/archive/${_commit}.tar.gz"
+checksum="2615a87112d205f9b66e91962c81e36653492a19d42125968a6c670b1eba7cb2"
+conflicts="compton picom"
+provides="picom compton"
+
+post_install() {
+	vlicense LICENSES/MIT
+	vsconf picom.sample.conf
+}
