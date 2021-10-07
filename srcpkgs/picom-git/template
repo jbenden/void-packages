@@ -1,8 +1,8 @@
 # Template file for 'picom-git'
 pkgname=picom-git
-version=20211006
-revision=2
-_commit=ad18d129cc549e4e00a0499df7de87f249a3a71f
+version=20211024
+revision=1
+_commit=a8445684fe18946604848efb73ace9457b29bf80
 wrksrc="picom-${_commit}"
 build_style=meson
 configure_args="-Dwith_docs=true"
@@ -14,9 +14,9 @@ depends="desktop-file-utils"
 short_desc="Lightweight compositor for X11 (previously a compton fork)"
 maintainer="Joseph Benden <joe@benden.us>"
 license="MIT, MPL-2.0"
-homepage="https://github.com/yshui/picom/"
-distfiles="https://github.com/yshui/picom/archive/${_commit}.tar.gz"
-checksum="2615a87112d205f9b66e91962c81e36653492a19d42125968a6c670b1eba7cb2"
+homepage="https://github.com/jonaburg/picom/"
+distfiles="https://github.com/jonaburg/picom/archive/${_commit}.tar.gz"
+checksum=9d7e7cf01d085e3dfc2c45877030c9494dfbacf41cc7745141505ae32523c5c5
 conflicts="compton picom"
 provides="picom compton"
 

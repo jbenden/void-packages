@@ -1,0 +1,58 @@
+From 6aebade8f0d1ed0bf3befa6ac1254d863c5e61e2 Mon Sep 17 00:00:00 2001
+From: Yuxuan Shui <yshuiv7@gmail.com>
+Date: Fri, 16 Jul 2021 19:11:23 +0100
+Subject: [PATCH] backend: add new image property: corner radius
+
+Signed-off-by: Yuxuan Shui <yshuiv7@gmail.com>
+---
+ src/backend/backend.h        | 4 ++++
+ src/backend/backend_common.c | 1 +
+ src/backend/backend_common.h | 1 +
+ 3 files changed, 6 insertions(+)
+
+diff --git a/src/backend/backend.h b/src/backend/backend.h
+index 775f5709..613073a5 100644
+--- a/src/backend/backend.h
++++ b/src/backend/backend.h
+@@ -36,6 +36,7 @@ typedef void (*backend_ready_callback_t)(void *);
+ // particular order:
+ //
+ // Color inversion -> Dimming -> Opacity multiply -> Limit maximum brightness
++// (Corner radius could be applied in any order)
+ enum image_properties {
+ 	// Whether the color of the image is inverted
+ 	// 1 boolean, default: false
+@@ -54,6 +55,9 @@ enum image_properties {
+ 	// brightness down to the max brightness value.
+ 	// 1 double, default: 1
+ 	IMAGE_PROPERTY_MAX_BRIGHTNESS,
++	// Gives the image a rounded corner.
++	// 1 double, default: 0
++	IMAGE_PROPERTY_CORNER_RADIUS,
+ };
+ 
+ enum image_operations {
+diff --git a/src/backend/backend_common.c b/src/backend/backend_common.c
+index c0377d3f..41808f3e 100644
+--- a/src/backend/backend_common.c
++++ b/src/backend/backend_common.c
+@@ -449,6 +449,7 @@ bool default_set_image_property(backend_t *base attr_unused, enum image_properti
+ 		tex->ewidth = iargs[0];
+ 		tex->eheight = iargs[1];
+ 		break;
++	case IMAGE_PROPERTY_CORNER_RADIUS: tex->corner_radius = dargs[0]; break;
+ 	case IMAGE_PROPERTY_MAX_BRIGHTNESS: tex->max_brightness = dargs[0]; break;
+ 	}
+ 
+diff --git a/src/backend/backend_common.h b/src/backend/backend_common.h
+index 702be5c3..1aaf1337 100644
+--- a/src/backend/backend_common.h
++++ b/src/backend/backend_common.h
+@@ -37,6 +37,7 @@ struct backend_image {
+ 	double opacity;
+ 	double dim;
+ 	double max_brightness;
++	double corner_radius;
+ 	// Effective size of the image
+ 	int ewidth, eheight;
+ 	bool color_inverted;
