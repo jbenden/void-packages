@@ -1,0 +1,33 @@
+# Template file for 'i3-gaps-rounded'
+pkgname=i3-gaps-rounded
+version=20240217
+revision=1
+_commit=2cd81edf105dff9bb9aef31f04189390bbe07c19
+wrksrc="${pkgname}-${_commit}"
+build_style=meson
+configure_args="-Dmans=true"
+hostmakedepends="pkg-config perl autoconf automake asciidoc pod2mdoc xmlto"
+makedepends="pcre2-devel yajl-devel libxcb-devel libev-devel
+ pango-devel startup-notification-devel libxkbcommon-devel
+ xcb-util-keysyms-devel xcb-util-wm-devel xcb-util-cursor-devel
+ xcb-util-xrm-devel"
+depends="perl-AnyEvent-I3"
+conf_files="/etc/i3/config /etc/i3/config.keycodes"
+short_desc="Improved tiling window manager - i3 fork with more features"
+maintainer="Joseph Benden <joe@benden.us>"
+license="BSD-3-Clause"
+homepage="https://github.com/jbenden/i3"
+distfiles="${homepage}/archive/${_commit}.tar.gz"
+checksum=7f6dc0cd810ea5663bd9ee0cdaf2e72a55f1b99fa31adc8fc376eb7468f24f1a
+
+provides="i3-${version}_${revision}"
+replaces="i3>=0"
+
+do_check() {
+	:
+}
+
+post_install() {
+	rm -rf ${DESTDIR}/usr/include
+	vlicense LICENSE
+}
