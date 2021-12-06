@@ -1,6 +1,6 @@
 # Template file for 'microsoft-edge-beta'
 pkgname=microsoft-edge-beta
-version=96.0.1054.8
+version=104.0.1293.21
 revision=1
 archs="x86_64"
 build_style=fetch
@@ -11,7 +11,7 @@ maintainer="Joseph Benden <joe@benden.us>"
 license="custom:Commercial"
 homepage="https://www.microsoftedgeinsider.com/en-us/"
 distfiles="https://packages.microsoft.com/repos/edge/pool/main/m/${pkgname}/${pkgname}_${version}-${revision}_amd64.deb"
-checksum=39283e7a57fb4c1d3d25a1e991b5522e4f87a6e120dd099828a94d7fe711115f
+checksum=c01ed7f7b4e899e75c09c05645c0c928401f3035889218c28efadf5da3387fb8
 
 restricted=yes
 noverifyrdeps=yes
