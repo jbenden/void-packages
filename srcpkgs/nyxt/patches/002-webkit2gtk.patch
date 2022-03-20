@@ -7,7 +7,7 @@
 -                "libwebkit2gtk-4.0.so"
                  ;; Fedora only has this one?
 -                "libwebkit2gtk-4.0.so.37")))
-+                "libwebkit2gtk-4.0.so.37"
++                "libwebkit2gtk-4.0.so.37.55.9"
 +                "libwebkit2gtk-4.0.so")))
    (use-foreign-library libwebkit2))
  
