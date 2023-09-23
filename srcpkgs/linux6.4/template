@@ -46,6 +46,11 @@ mutable_files="
  /usr/lib/modules/${_kernver}/modules.alias.bin
  /usr/lib/modules/${_kernver}/modules.devname"
 
+build_options=desktop
+build_options_default=desktop
+
+desc_option_desktop="Enable desktop-class kernel features"
+
 # reproducible build
 export KBUILD_BUILD_TIMESTAMP=$(LC_ALL=C date -ud @${SOURCE_DATE_EPOCH:-0})
 export KBUILD_BUILD_USER=voidlinux
@@ -56,11 +61,32 @@ if [ "$CROSS_BUILD" ]; then
 fi
 
 pre_patch() {
+	local arch subarch
+
+	case "$XBPS_TARGET_MACHINE" in
+		i686*) arch=i386;;
+		x86_64*) arch=x86_64;;
+		arm*) arch=arm;;
+		aarch64*) arch=arm64;;
+		ppc64le*) arch=powerpc; subarch=ppc64le;;
+		ppc64*) arch=powerpc; subarch=ppc64;;
+		ppc*) arch=powerpc; subarch=ppc;;
+		mips*) arch=mips;;
+	esac
+
 	if [ ! -f $XBPS_SRCDISTDIR/$pkgname-$version/patch-${version}.xz ]; then
 		return
 	fi
 	xzcat $XBPS_SRCDISTDIR/$pkgname-$version/patch-${version}.xz |
 		patch -sNp1 -F0
+
+	if [ "$build_option_desktop" ]; then
+		if [ -d "$FILESDIR"/../patches/"${subarch:-$arch}" ]; then
+			msg_normal "Applying ${subarch:-$arch} patch series...\n"
+			find "$FILESDIR"/../patches/"${subarch:-$arch}" -type f -print0 \
+				| sort -z | xargs -0 -n 1 patch -Np1 -i
+		fi
+	fi
 }
 
 do_configure() {
