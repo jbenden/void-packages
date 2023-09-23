@@ -1,0 +1,20 @@
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -139,10 +139,17 @@ unsigned int sysctl_sched_child_runs_fir
+  *
+  * (default: 1 msec * (1 + ilog(ncpus)), units: nanoseconds)
+  */
++#ifdef CONFIG_ZENIFY
++unsigned int sysctl_sched_wakeup_granularity			= 500000UL;
++static unsigned int normalized_sysctl_sched_wakeup_granularity	= 500000UL;
++
++const_debug unsigned int sysctl_sched_migration_cost	= 50000UL;
++#else
+ unsigned int sysctl_sched_wakeup_granularity			= 1000000UL;
+ static unsigned int normalized_sysctl_sched_wakeup_granularity	= 1000000UL;
+ 
+ const_debug unsigned int sysctl_sched_migration_cost	= 500000UL;
++#endif
+ 
+ int sched_thermal_decay_shift;
+ static int __init setup_sched_thermal_decay_shift(char *str)

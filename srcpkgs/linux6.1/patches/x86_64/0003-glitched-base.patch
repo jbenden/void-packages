@@ -1,0 +1,416 @@
+From f7f49141a5dbe9c99d78196b58c44307fb2e6be3 Mon Sep 17 00:00:00 2001
+From: Tk-Glitch <ti3nou@gmail.com>
+Date: Wed, 4 Jul 2018 04:30:08 +0200
+Subject: [PATCH 01/17] glitched
+
+---
+ init/Makefile | 2 +-
+ 1 file changed, 1 insertions(+), 1 deletions(-)
+
+--- a/init/Makefile
++++ b/init/Makefile
+@@ -33,7 +33,7 @@ build-timestamp = $(or $(KBUILD_BUILD_TI
+ 
+ # Maximum length of UTS_VERSION is 64 chars
+ filechk_uts_version = \
+-	utsver=$$(echo '$(pound)'"$(build-version)" $(smp-flag-y) $(preempt-flag-y) "$(build-timestamp)" | cut -b -64); \
++	utsver=$$(echo '$(pound)'"$(build-version)" $(smp-flag-y) $(preempt-flag-y) "TKG" "$(build-timestamp)" | cut -b -64); \
+ 	echo '$(pound)'define UTS_VERSION \""$${utsver}"\"
+ 
+ #
+--- a/fs/dcache.c
++++ b/fs/dcache.c
+@@ -71,7 +71,7 @@
+  * If no ancestor relationship:
+  * arbitrary, since it's serialized on rename_lock
+  */
+-int sysctl_vfs_cache_pressure __read_mostly = 100;
++int sysctl_vfs_cache_pressure __read_mostly = 50;
+ EXPORT_SYMBOL_GPL(sysctl_vfs_cache_pressure);
+ 
+ __cacheline_aligned_in_smp DEFINE_SEQLOCK(rename_lock);
+--- a/kernel/sched/rt.c
++++ b/kernel/sched/rt.c
+@@ -20,9 +20,9 @@ unsigned int sysctl_sched_rt_period = 10
+ 
+ /*
+  * part of the period that we allow rt tasks to run in us.
+- * default: 0.95s
++ * XanMod default: 0.98s
+  */
+-int sysctl_sched_rt_runtime = 950000;
++int sysctl_sched_rt_runtime = 980000;
+ 
+ #ifdef CONFIG_SYSCTL
+ static int sysctl_sched_rr_timeslice = (MSEC_PER_SEC * RR_TIMESLICE) / HZ;
+--- a/scripts/setlocalversion
++++ b/scripts/setlocalversion
+@@ -54,7 +54,7 @@ scm_version()
+ 			# If only the short version is requested, don't bother
+ 			# running further git commands
+ 			if $short; then
+-				echo "+"
++			#	echo "+"
+ 				return
+ 			fi
+ 			# If we are past a tagged commit (like
+--- a/drivers/infiniband/core/addr.c
++++ b/drivers/infiniband/core/addr.c
+@@ -820,6 +820,7 @@ int rdma_addr_find_l2_eth_by_grh(const u
+ 	union {
+ 		struct sockaddr_in  _sockaddr_in;
+ 		struct sockaddr_in6 _sockaddr_in6;
++		struct sockaddr_ib  _sockaddr_ib;
+ 	} sgid_addr, dgid_addr;
+ 	int ret;
+ 
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -123,6 +123,38 @@ config THREAD_INFO_IN_TASK
+ 
+ menu "General setup"
+ 
++config ZENIFY
++	bool "A selection of patches from Zen/Liquorix kernel and additional tweaks for a better gaming experience"
++	default y
++	help
++	  Tunes the kernel for responsiveness at the cost of throughput and power usage.
++
++	  --- Virtual Memory Subsystem ---------------------------
++
++	    Mem dirty before bg writeback..:  10 %  ->  20 %
++	    Mem dirty before sync writeback:  20 %  ->  50 %
++
++	  --- Block Layer ----------------------------------------
++
++	    Queue depth...............:      128    -> 512
++	    Default MQ scheduler......: mq-deadline -> bfq
++
++	  --- CFS CPU Scheduler ----------------------------------
++
++	    Scheduling latency.............:   6    ->   3    ms
++	    Minimal granularity............:   0.75 ->   0.3  ms
++	    Wakeup granularity.............:   1    ->   0.5  ms
++	    CPU migration cost.............:   0.5  ->   0.25 ms
++	    Bandwidth slice size...........:   5    ->   3    ms
++	    Ondemand fine upscaling limit..:  95 %  ->  85 %
++
++	  --- MuQSS CPU Scheduler --------------------------------
++
++	    Scheduling interval............:   6    ->   3    ms
++	    ISO task max realtime use......:  70 %  ->  25 %
++	    Ondemand coarse upscaling limit:  80 %  ->  45 %
++	    Ondemand fine upscaling limit..:  95 %  ->  45 %
++
+ config BROKEN
+ 	bool
+ 
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -69,8 +69,13 @@
+  *
+  * (default: 6ms * (1 + ilog(ncpus)), units: nanoseconds)
+  */
++#ifdef CONFIG_ZENIFY
++unsigned int sysctl_sched_latency			= 3000000ULL;
++static unsigned int normalized_sysctl_sched_latency	= 3000000ULL;
++#else
+ unsigned int sysctl_sched_latency			= 6000000ULL;
+ static unsigned int normalized_sysctl_sched_latency	= 6000000ULL;
++#endif
+ 
+ /*
+  * The initial- and re-scaling of tunables is configurable
+@@ -90,8 +95,13 @@ unsigned int sysctl_sched_tunable_scalin
+  *
+  * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
+  */
++#ifdef CONFIG_ZENIFY
++unsigned int sysctl_sched_min_granularity			= 300000ULL;
++static unsigned int normalized_sysctl_sched_min_granularity	= 300000ULL;
++#else
+ unsigned int sysctl_sched_min_granularity			= 750000ULL;
+ static unsigned int normalized_sysctl_sched_min_granularity	= 750000ULL;
++#endif
+ 
+ /*
+  * Minimal preemption granularity for CPU-bound SCHED_IDLE tasks.
+@@ -99,12 +109,20 @@ static unsigned int normalized_sysctl_sc
+  *
+  * (default: 0.75 msec)
+  */
++#ifdef CONFIG_ZENIFY
++unsigned int sysctl_sched_idle_min_granularity			= 300000ULL;
++#else
+ unsigned int sysctl_sched_idle_min_granularity			= 750000ULL;
++#endif
+ 
+ /*
+  * This value is kept at sysctl_sched_latency/sysctl_sched_min_granularity
+  */
++#ifdef CONFIG_ZENIFY
++static unsigned int sched_nr_latency = 10;
++#else
+ static unsigned int sched_nr_latency = 8;
++#endif
+ 
+ /*
+  * After fork, child runs first. If set to 0 (default) then
+@@ -175,8 +193,12 @@ int __weak arch_asym_cpu_priority(int cp
+  *
+  * (default: 5 msec, units: microseconds)
+  */
++#ifdef CONFIG_ZENIFY
++static unsigned int sysctl_sched_cfs_bandwidth_slice		= 3000UL;
++#else
+ static unsigned int sysctl_sched_cfs_bandwidth_slice		= 5000UL;
+ #endif
++#endif
+ 
+ #ifdef CONFIG_SYSCTL
+ static struct ctl_table sched_fair_sysctls[] = {
+--- a/mm/page-writeback.c
++++ b/mm/page-writeback.c
+@@ -70,7 +70,11 @@ static long ratelimit_pages = 32;
+ /*
+  * Start background writeback (via writeback threads) at this percentage
+  */
++#ifdef CONFIG_ZENIFY
++static int dirty_background_ratio = 20;
++#else
+ static int dirty_background_ratio = 10;
++#endif
+ 
+ /*
+  * dirty_background_bytes starts at 0 (disabled) so that it is a function of
+@@ -87,7 +91,11 @@ static int vm_highmem_is_dirtyable;
+ /*
+  * The generator of dirty data starts writeback at this percentage
+  */
++#ifdef CONFIG_ZENIFY
++static int vm_dirty_ratio = 50;
++#else
+ static int vm_dirty_ratio = 20;
++#endif
+ 
+ /*
+  * vm_dirty_bytes starts at 0 (disabled) so that it is a function of
+--- a/net/ipv4/Kconfig
++++ b/net/ipv4/Kconfig
+@@ -700,6 +700,9 @@ choice
+ 	config DEFAULT_VEGAS
+ 		bool "Vegas" if TCP_CONG_VEGAS=y
+ 
++	config DEFAULT_YEAH
++		bool "YeAH" if TCP_CONG_YEAH=y
++
+ 	config DEFAULT_VENO
+ 		bool "Veno" if TCP_CONG_VENO=y
+ 
+@@ -733,6 +736,7 @@ config DEFAULT_TCP_CONG
+ 	default "htcp" if DEFAULT_HTCP
+ 	default "hybla" if DEFAULT_HYBLA
+ 	default "vegas" if DEFAULT_VEGAS
++	default "yeah" if DEFAULT_YEAH
+ 	default "westwood" if DEFAULT_WESTWOOD
+ 	default "veno" if DEFAULT_VENO
+ 	default "reno" if DEFAULT_RENO
+--- a/mm/huge_memory.c
++++ b/mm/huge_memory.c
+@@ -61,7 +61,11 @@ unsigned long transparent_hugepage_flags
+ #ifdef CONFIG_TRANSPARENT_HUGEPAGE_MADVISE
+ 	(1<<TRANSPARENT_HUGEPAGE_REQ_MADV_FLAG)|
+ #endif
++#ifdef CONFIG_ZENIFY
++	(1<<TRANSPARENT_HUGEPAGE_DEFRAG_KSWAPD_OR_MADV_FLAG)|
++#else
+ 	(1<<TRANSPARENT_HUGEPAGE_DEFRAG_REQ_MADV_FLAG)|
++#endif
+ 	(1<<TRANSPARENT_HUGEPAGE_DEFRAG_KHUGEPAGED_FLAG)|
+ 	(1<<TRANSPARENT_HUGEPAGE_USE_ZERO_PAGE_FLAG);
+ 
+--- a/net/sched/Kconfig
++++ b/net/sched/Kconfig
+@@ -474,6 +474,9 @@ choice
+ 	config DEFAULT_SFQ
+ 		bool "Stochastic Fair Queue" if NET_SCH_SFQ
+ 
++	config DEFAULT_CAKE
++		bool "Common Applications Kept Enhanced" if NET_SCH_CAKE
++
+ 	config DEFAULT_PFIFO_FAST
+ 		bool "Priority FIFO Fast"
+ endchoice
+@@ -485,6 +488,7 @@ config DEFAULT_NET_SCH
+ 	default "fq_codel" if DEFAULT_FQ_CODEL
+ 	default "fq_pie" if DEFAULT_FQ_PIE
+ 	default "sfq" if DEFAULT_SFQ
++	default "cake" if DEFAULT_CAKE
+ 	default "pfifo_fast"
+ endif
+ 
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -198,8 +198,7 @@ static inline void __mm_zero_struct_page
+  * not a hard limit any more. Although some userspace tools can be surprised by
+  * that.
+  */
+-#define MAPCOUNT_ELF_CORE_MARGIN	(5)
+-#define DEFAULT_MAX_MAP_COUNT	(USHRT_MAX - MAPCOUNT_ELF_CORE_MARGIN)
++#define DEFAULT_MAX_MAP_COUNT	(16777216)
+ 
+ extern int sysctl_max_map_count;
+ 
+--- a/block/elevator.c
++++ b/block/elevator.c
+@@ -630,8 +630,8 @@ static inline bool elv_support_iosched(s
+ }
+ 
+ /*
+- * For single queue devices, default to using mq-deadline. If we have multiple
+- * queues or mq-deadline is not available, default to "none".
++ * For single queue devices, default to using bfq. If we have multiple
++ * queues or bfq is not available, default to "none".
+  */
+ static struct elevator_type *elevator_get_default(struct request_queue *q)
+ {
+@@ -642,7 +642,7 @@ static struct elevator_type *elevator_ge
+ 	    !blk_mq_is_shared_tags(q->tag_set->flags))
+ 		return NULL;
+ 
+-	return elevator_get(q, "mq-deadline", false);
++	return elevator_get(q, "bfq", false);
+ }
+ 
+ /*
+--- a/include/linux/pagemap.h
++++ b/include/linux/pagemap.h
+@@ -1216,7 +1216,7 @@ struct readahead_control {
+ 		._index = i,						\
+ 	}
+ 
+-#define VM_READAHEAD_PAGES	(SZ_128K / PAGE_SIZE)
++#define VM_READAHEAD_PAGES	(SZ_2M / PAGE_SIZE)
+ 
+ void page_cache_ra_unbounded(struct readahead_control *,
+ 		unsigned long nr_to_read, unsigned long lookahead_count);
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -2110,6 +2110,9 @@
+ 			disable
+ 			  Do not enable intel_pstate as the default
+ 			  scaling driver for the supported processors
++			enable
++			  Enable intel_pstate in-case "disable" was passed
++			  previously in the kernel boot parameters
+ 			passive
+ 			  Use intel_pstate as a scaling driver, but configure it
+ 			  to work with generic cpufreq governors (instead of
+--- a/drivers/cpufreq/intel_pstate.c
++++ b/drivers/cpufreq/intel_pstate.c
+@@ -3503,6 +3503,8 @@ static int __init intel_pstate_setup(cha
+ 	if (!strcmp(str, "no_hwp"))
+ 		no_hwp = 1;
+ 
++	if (!strcmp(str, "enable"))
++		no_load = 0;
+ 	if (!strcmp(str, "force"))
+ 		force_load = 1;
+ 	if (!strcmp(str, "hwp_only"))
+--- a/drivers/input/evdev.c
++++ b/drivers/input/evdev.c
+@@ -46,6 +46,7 @@ struct evdev_client {
+ 	struct fasync_struct *fasync;
+ 	struct evdev *evdev;
+ 	struct list_head node;
++	struct rcu_head rcu;
+ 	enum input_clock_type clk_type;
+ 	bool revoked;
+ 	unsigned long *evmasks[EV_CNT];
+@@ -377,13 +378,22 @@ static void evdev_attach_client(struct e
+ 	spin_unlock(&evdev->client_lock);
+ }
+ 
++static void evdev_reclaim_client(struct rcu_head *rp)
++{
++	struct evdev_client *client = container_of(rp, struct evdev_client, rcu);
++	unsigned int i;
++	for (i = 0; i < EV_CNT; ++i)
++		bitmap_free(client->evmasks[i]);
++	kvfree(client);
++}
++
+ static void evdev_detach_client(struct evdev *evdev,
+ 				struct evdev_client *client)
+ {
+ 	spin_lock(&evdev->client_lock);
+ 	list_del_rcu(&client->node);
+ 	spin_unlock(&evdev->client_lock);
+-	synchronize_rcu();
++	call_rcu(&client->rcu, evdev_reclaim_client);
+ }
+ 
+ static int evdev_open_device(struct evdev *evdev)
+@@ -436,7 +446,6 @@ static int evdev_release(struct inode *i
+ {
+ 	struct evdev_client *client = file->private_data;
+ 	struct evdev *evdev = client->evdev;
+-	unsigned int i;
+ 
+ 	mutex_lock(&evdev->mutex);
+ 
+@@ -448,11 +457,6 @@ static int evdev_release(struct inode *i
+ 
+ 	evdev_detach_client(evdev, client);
+ 
+-	for (i = 0; i < EV_CNT; ++i)
+-		bitmap_free(client->evmasks[i]);
+-
+-	kvfree(client);
+-
+ 	evdev_close_device(evdev);
+ 
+ 	return 0;
+@@ -495,7 +499,6 @@ static int evdev_open(struct inode *inod
+ 
+  err_free_client:
+ 	evdev_detach_client(evdev, client);
+-	kvfree(client);
+ 	return error;
+ }
+ 
+--- a/include/linux/pageblock-flags.h
++++ b/include/linux/pageblock-flags.h
+@@ -48,7 +48,7 @@ extern unsigned int pageblock_order;
+ #else /* CONFIG_HUGETLB_PAGE */
+ 
+ /* If huge pages are not used, group by MAX_ORDER_NR_PAGES */
+-#define pageblock_order		(MAX_ORDER-1)
++#define pageblock_order		PAGE_ALLOC_COSTLY_ORDER
+ 
+ #endif /* CONFIG_HUGETLB_PAGE */
+ 
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -3098,16 +3098,17 @@ retry:
+ }
+ 
+ /*
+- * Obtain a specified number of elements from the buddy allocator, all under
+- * a single hold of the lock, for efficiency.  Add them to the supplied list.
+- * Returns the number of new pages which were placed at *list.
++ * Obtain a specified number of elements from the buddy allocator, and relax the
++ * zone lock when needed. Add them to the supplied list. Returns the number of
++ * new pages which were placed at *list.
+  */
+ static int rmqueue_bulk(struct zone *zone, unsigned int order,
+ 			unsigned long count, struct list_head *list,
+ 			int migratetype, unsigned int alloc_flags)
+ {
+ 	unsigned long flags;
+-	int i, allocated = 0;
++	const bool can_resched = !preempt_count() && !irqs_disabled();
++	int i, allocated = 0, last_mod = 0;
+ 
+ 	spin_lock_irqsave(&zone->lock, flags);
+ 	for (i = 0; i < count; ++i) {

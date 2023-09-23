@@ -1,0 +1,14 @@
+0001-add-sysctl-to-disallow-unprivileged-CLONE_NEWUSER-by.patch
+0001-mm-Support-soft-dirty-flag-reset-for-VA-range.patch
+0002-clear-patches.patch
+0002-mm-Support-soft-dirty-flag-read-with-reset.patch
+0003-glitched-base.patch
+0003-glitched-cfs.patch
+0003-glitched-cfs-additions.patch
+0006-add-acs-overrides_iommu.patch
+0007-v6.1-fsync_legacy_via_futex_waitv.patch
+0009-glitched-bmq.patch
+0009-prjc_v6.1-r1.patch
+0012-misc-additions.patch
+0013-fedora-rpm.patch
+0100-increase-sched-latency.patch

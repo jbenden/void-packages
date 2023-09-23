@@ -1,0 +1,22 @@
+--- a/kernel/sched/core.c
++++ b/kernel/sched/core.c
+@@ -135,7 +135,7 @@ const_debug unsigned int sysctl_sched_fe
+  * If sysctl_resched_latency_warn_once is set, only one warning will be shown
+  * per boot.
+  */
+-__read_mostly int sysctl_resched_latency_warn_ms = 100;
++__read_mostly int sysctl_resched_latency_warn_ms = 1000;
+ __read_mostly int sysctl_resched_latency_warn_once = 1;
+ #endif /* CONFIG_SCHED_DEBUG */
+ 
+--- a/kernel/sched/alt_core.c
++++ b/kernel/sched/alt_core.c
+@@ -62,7 +62,7 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(pelt_irq_tp
+  * If sysctl_resched_latency_warn_once is set, only one warning will be shown
+  * per boot.
+  */
+-__read_mostly int sysctl_resched_latency_warn_ms = 100;
++__read_mostly int sysctl_resched_latency_warn_ms = 1000;
+ __read_mostly int sysctl_resched_latency_warn_once = 1;
+ #else
+ #define sched_feat(x)	(0)
